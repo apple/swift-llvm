@@ -2504,7 +2504,7 @@ TargetLowering::AtomicExpansionKind
 HexagonTargetLowering::shouldExpandAtomicLoadInIR(LoadInst *LI) const {
   // Do not expand loads and stores that don't exceed 64 bits.
   return LI->getType()->getPrimitiveSizeInBits() > 64
-             ? AtomicExpansionKind::LLSC
+             ? AtomicExpansionKind::LLOnly
              : AtomicExpansionKind::None;
 }
 

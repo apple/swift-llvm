@@ -74,7 +74,7 @@
 // Google Test defines the testing::Message class to allow construction of
 // test messages via the << operator.  The idea is that anything
 // streamable to std::ostream can be streamed to a testing::Message.
-// This allows a user to use his own types in Google Test assertions by
+// This allows a user to use their own types in Google Test assertions by
 // overloading the << operator.
 //
 // util/gtl/stl_logging-inl.h overloads << for STL containers.  These

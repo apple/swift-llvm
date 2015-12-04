@@ -10,7 +10,7 @@
 # This file is included by all of the LLVM makefiles.  For details on how to use
 # it properly, please see the document MakefileGuide.html in the docs directory.
 #
-#===-----------------------------------------------------------------------====#
+#===------------------------------------------------------------------------===#
 
 ################################################################################
 # TARGETS: Define standard targets that can be invoked

@@ -2526,7 +2526,7 @@ called *concept-based polymorphism*. This pattern emulates the interfaces and
 behaviors of templates using a very limited form of virtual dispatch for type
 erasure inside its implementation. You can find examples of this technique in
 the ``PassManager.h`` system, and there is a more detailed introduction to it
-by Sean Parent in several of his talks and papers:
+by Sean Parent in several of their talks and papers:
 
 #. `Inheritance Is The Base Class of Evil
    <http://channel9.msdn.com/Events/GoingNative/2013/Inheritance-Is-The-Base-Class-of-Evil>`_

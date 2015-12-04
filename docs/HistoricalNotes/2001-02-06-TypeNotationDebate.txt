@@ -42,7 +42,7 @@ an experiment that failed. However, this syntactic construct has been
 around for 27 years and perhaps more; why do you consider it problematic
 (except for its cumbersome syntax)?" and read that response for me.  :)
 
-Now with this syntax, his example would be represented as:
+Now with this syntax, their example would be represented as:
 
 [ %10, bool (int, int) * ] *
 

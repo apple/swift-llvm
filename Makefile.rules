@@ -1387,7 +1387,7 @@ endif
 ifeq ($(HOST_OS),Darwin)
 ifdef TOOL_INFO_PLIST
 
-LD.Flags += -Wl,-sectcreate,__TEXT,__info_plist,$(ObjDir)/$(TOOL_INFO_PLIST)
+LD.Flags += -Wl,-sectcreate,__TEXT,__info_plist,"$(ObjDir)/$(TOOL_INFO_PLIST)"
 
 $(ToolBuildPath): $(ObjDir)/$(TOOL_INFO_PLIST)
 

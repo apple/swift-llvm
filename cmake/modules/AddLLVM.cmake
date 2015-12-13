@@ -68,7 +68,7 @@ function(add_llvm_symbol_exports target_name export_file)
       VERBATIM
       COMMENT "Creating export file for ${target_name}")
     set_property(TARGET ${target_name} APPEND_STRING PROPERTY
-                 LINK_FLAGS " -Wl,-exported_symbols_list,${CMAKE_CURRENT_BINARY_DIR}/${native_export_file}")
+                 LINK_FLAGS " -Wl,-exported_symbols_list,\"${CMAKE_CURRENT_BINARY_DIR}/${native_export_file}\"")
   elseif(LLVM_HAVE_LINK_VERSION_SCRIPT)
     # Gold and BFD ld require a version script rather than a plain list.
     set(native_export_file "${target_name}.exports")

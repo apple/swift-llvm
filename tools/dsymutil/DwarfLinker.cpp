@@ -3234,10 +3234,8 @@ void DwarfLinker::loadClangModule(StringRef Filename, StringRef ModulePath,
   auto &Obj =
       ModuleMap.addDebugMapObject(Path, sys::TimeValue::PosixZeroTime());
   auto ErrOrObj = loadObject(ObjHolder, Obj, ModuleMap);
-  if (!ErrOrObj) {
-    ClangModules.erase(ClangModules.find(Filename));
+  if (!ErrOrObj)
     return;
-  }
 
   std::unique_ptr<CompileUnit> Unit;
 

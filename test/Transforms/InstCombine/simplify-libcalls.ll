@@ -141,29 +141,5 @@ define void @test9(i8* %x) {
   ret void
 }
 
-; rdar://problem/24220238 - Crash due to unchecked result of getCalledFunction()
-%class.A = type { i32 (...)** }
-
-define double @test10(%class.A* %this) unnamed_addr #2 align 2 {
-; CHECK-LABEL: @test10(
-  %1 = alloca %class.A*, align 8
-  %a = alloca double, align 8
-  store %class.A* %this, %class.A** %1, align 8
-  %2 = load %class.A*, %class.A** %1, align 8
-  %3 = bitcast %class.A* %2 to double (%class.A*)***
-  %4 = load double (%class.A*)**, double (%class.A*)*** %3, align 8
-  %5 = getelementptr inbounds double (%class.A*)*, double (%class.A*)** %4, i64 0
-  %6 = load double (%class.A*)*, double (%class.A*)** %5, align 8
-  %7 = call double %6(%class.A* %2)
-  store double %7, double* %a, align 8
-  %8 = load double, double* %a, align 8
-  %9 = call double @llvm.pow.f64(double %8, double 0.000000e+00)
-  ret double %9
-}
-
-declare double @llvm.pow.f64(double, double) #3
-
 attributes #0 = { nobuiltin }
 attributes #1 = { builtin }
-attributes #2 = { ssp uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="true" "no-nans-fp-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="core2" "target-features"="+cx16,+fxsr,+mmx,+sse,+sse2,+sse3,+ssse3" "unsafe-fp-math"="true" "use-soft-float"="false" }
-attributes #3 = { nounwind readnone }

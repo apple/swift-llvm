@@ -1291,6 +1291,15 @@ static bool isConjunctionDisjunctionTree(const SDValue Val, bool &CanPushNegate,
     return false;
   unsigned Opcode = Val->getOpcode();
   if (Opcode == ISD::SETCC) {
+    // If we need two CCs to lower one ISD CC, bail out, as correctly
+    // supporting that subtree is tricky.
+    // rdar://24232931
+    AArch64CC::CondCode CC, ExtraCC;
+    changeFPCCToAArch64CC(cast<CondCodeSDNode>(Val->getOperand(2))->get(),
+                          CC, ExtraCC);
+    if (ExtraCC != AArch64CC::AL)
+      return false;
+
     CanPushNegate = true;
     return true;
   }
@@ -1346,23 +1355,16 @@ static SDValue emitConjunctionDisjunctionTree(SelectionDAG &DAG, SDValue Val,
       assert(LHS.getValueType().isFloatingPoint());
       AArch64CC::CondCode ExtraCC;
       changeFPCCToAArch64CC(CC, OutCC, ExtraCC);
-      // Surpisingly some floating point conditions can't be tested with a
-      // single condition code. Construct an additional comparison in this case.
-      // See comment below on how we deal with OR conditions.
+      // If we need two CCs to lower one ISD CC, bail out, as correctly
+      // supporting that subtree is tricky.
+      // rdar://24232931
       if (ExtraCC != AArch64CC::AL) {
-        SDValue ExtraCmp;
-        if (!CCOp.getNode())
-          ExtraCmp = emitComparison(LHS, RHS, CC, DL, DAG);
-        else {
-          SDValue ConditionOp = DAG.getConstant(Predicate, DL, MVT_CC);
-          // Note that we want the inverse of ExtraCC, so NZCV is not inversed.
-          unsigned NZCV = AArch64CC::getNZCVToSatisfyCondCode(ExtraCC);
-          ExtraCmp = emitConditionalComparison(LHS, RHS, CC, CCOp, ConditionOp,
-                                               NZCV, DL, DAG);
-        }
-        CCOp = ExtraCmp;
-        Predicate = AArch64CC::getInvertedCondCode(ExtraCC);
-        OutCC = AArch64CC::getInvertedCondCode(OutCC);
+        // If the root is a SETCC, we can just bail out.
+        if (!Depth)
+          return SDValue();
+        // Otherwise, we should have rejected these cases in
+        // isConjunctionDisjunctionTree.
+        report_fatal_error("Unexpected 2-CC SETCC in CCMP lowering!");
       }
     }
 

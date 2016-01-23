@@ -3024,7 +3024,7 @@ void llvm::WriteBitcodeToFile(const Module *M, raw_ostream &Out,
   // If this is darwin or another generic macho target, reserve space for the
   // header.
   Triple TT(M->getTargetTriple());
-  if (TT.isOSDarwin())
+  if (TT.isOSDarwin() || TT.isOSBinFormatMachO())
     Buffer.insert(Buffer.begin(), DarwinBCHeaderSize, 0);
 
   // Emit the module into the buffer.
@@ -3046,7 +3046,7 @@ void llvm::WriteBitcodeToFile(const Module *M, raw_ostream &Out,
                 EmitFunctionSummary);
   }
 
-  if (TT.isOSDarwin())
+  if (TT.isOSDarwin() || TT.isOSBinFormatMachO())
     EmitDarwinBCHeaderAndTrailer(Buffer, TT);
 
   // Write the generated bitstream to "Out".

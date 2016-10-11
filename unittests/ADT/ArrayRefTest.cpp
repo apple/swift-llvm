@@ -180,6 +180,14 @@ TEST(ArrayRefTest, InitializerList) {
   ArgTest12({1, 2});
 }
 
+TEST(ArrayRefTest, EmptyInitializerList) {
+  ArrayRef<int> A = {};
+  EXPECT_TRUE(A.empty());
+
+  A = {};
+  EXPECT_TRUE(A.empty());
+}
+
 // Test that makeArrayRef works on ArrayRef (no-op)
 TEST(ArrayRefTest, makeArrayRef) {
   static const int A1[] = {1, 2, 3, 4, 5, 6, 7, 8};

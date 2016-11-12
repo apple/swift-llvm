@@ -231,7 +231,14 @@ protected:
 /// See the file comment for details on the usage of the
 /// TrailingObjects type.
 template <typename BaseTy, typename... TrailingTys>
+
+// Work around MSVC build error: cannot access inaccessible struct declared
+// in class'llvm::trailing_objects_internal::TrailingObjectsBase'
+#if defined(_MSC_VER)
+class TrailingObjects : protected trailing_objects_internal::TrailingObjectsImpl<
+#else
 class TrailingObjects : private trailing_objects_internal::TrailingObjectsImpl<
+#endif
                             trailing_objects_internal::AlignmentCalcHelper<
                                 TrailingTys...>::Alignment,
                             BaseTy, TrailingObjects<BaseTy, TrailingTys...>,

@@ -419,8 +419,13 @@ option(LLVM_ENABLE_EXPENSIVE_CHECKS "Enable expensive checks" OFF)
 set(LLVM_ABI_BREAKING_CHECKS "WITH_ASSERTS" CACHE STRING
   "Enable abi-breaking checks.  Can be WITH_ASSERTS, FORCE_ON or FORCE_OFF.")
 
+set(default_LLVM_DISABLE_ABI_BREAKING_CHECKS_ENFORCING OFF)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/swift)
+  set(default_LLVM_DISABLE_ABI_BREAKING_CHECKS_ENFORCING ON)
+endif()
 option(LLVM_DISABLE_ABI_BREAKING_CHECKS_ENFORCING
-  "Disable abi-breaking checks mismatch detection at link-tim." OFF)
+  "Disable abi-breaking checks mismatch detection at link-tim."
+  ${default_LLVM_DISABLE_ABI_BREAKING_CHECKS_ENFORCING})
 
 option(LLVM_FORCE_USE_OLD_HOST_TOOLCHAIN
        "Set to ON to force using an old, unsupported host toolchain." OFF)

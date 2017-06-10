@@ -1,4 +1,4 @@
-//===- llvm-pdbdump.h ----------------------------------------- *- C++ --*-===//
+//===- llvm-pdbutil.h ----------------------------------------- *- C++ --*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -37,6 +37,7 @@ enum class ModuleSubsection {
   StringTable,
   Symbols,
   FrameData,
+  CoffSymbolRVAs,
   All
 };
 

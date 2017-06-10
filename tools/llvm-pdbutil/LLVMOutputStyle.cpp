@@ -11,7 +11,7 @@
 
 #include "CompactTypeDumpVisitor.h"
 #include "StreamUtil.h"
-#include "llvm-pdbdump.h"
+#include "llvm-pdbutil.h"
 
 #include "llvm/DebugInfo/CodeView/CVTypeVisitor.h"
 #include "llvm/DebugInfo/CodeView/DebugChecksumsSubsection.h"
@@ -22,6 +22,7 @@
 #include "llvm/DebugInfo/CodeView/DebugLinesSubsection.h"
 #include "llvm/DebugInfo/CodeView/DebugStringTableSubsection.h"
 #include "llvm/DebugInfo/CodeView/DebugSubsectionVisitor.h"
+#include "llvm/DebugInfo/CodeView/DebugSymbolRVASubsection.h"
 #include "llvm/DebugInfo/CodeView/DebugSymbolsSubsection.h"
 #include "llvm/DebugInfo/CodeView/DebugUnknownSubsection.h"
 #include "llvm/DebugInfo/CodeView/EnumTables.h"
@@ -283,6 +284,16 @@ public:
         break;
       P.printString(S);
     }
+    return Error::success();
+  }
+
+  Error visitCOFFSymbolRVAs(DebugSymbolRVASubsectionRef &RVAs,
+                            const DebugSubsectionState &State) override {
+    if (!opts::checkModuleSubsection(opts::ModuleSubsection::CoffSymbolRVAs))
+      return Error::success();
+
+    ListScope D(P, "COFF Symbol RVAs");
+    P.printHexList("RVAs", RVAs);
     return Error::success();
   }
 

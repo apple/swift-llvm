@@ -1,4 +1,4 @@
-//===- llvm-pdbdump.cpp - Dump debug info from a PDB file -------*- C++ -*-===//
+//===- llvm-pdbutil.cpp - Dump debug info from a PDB file -------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm-pdbdump.h"
+#include "llvm-pdbutil.h"
 
 #include "Analyze.h"
 #include "Diff.h"
@@ -442,6 +442,8 @@ cl::list<ModuleSubsection> DumpModuleSubsections(
         clEnumValN(ModuleSubsection::Symbols, "symbols",
                    "Symbols (DEBUG_S_SYMBOLS subsection) (not typically "
                    "present in PDB file)"),
+        clEnumValN(ModuleSubsection::CoffSymbolRVAs, "rvas",
+                   "COFF Symbol RVAs (DEBUG_S_COFF_SYMBOL_RVA subsection)"),
         clEnumValN(ModuleSubsection::Unknown, "unknown",
                    "Any subsection not covered by another option"),
         clEnumValN(ModuleSubsection::All, "all", "All known subsections")),
@@ -867,7 +869,7 @@ int main(int argc_, const char *argv_[]) {
   sys::PrintStackTraceOnErrorSignal(argv_[0]);
   PrettyStackTraceProgram X(argc_, argv_);
 
-  ExitOnErr.setBanner("llvm-pdbdump: ");
+  ExitOnErr.setBanner("llvm-pdbutil: ");
 
   SmallVector<const char *, 256> argv;
   SpecificBumpPtrAllocator<char> ArgAllocator;

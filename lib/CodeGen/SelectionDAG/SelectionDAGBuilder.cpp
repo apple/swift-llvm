@@ -8021,6 +8021,7 @@ TargetLowering::LowerCallTo(TargetLowering::CallLoweringInfo &CLI) const {
     Entry.IsReturned = false;
     Entry.IsSwiftSelf = false;
     Entry.IsSwiftError = false;
+    Entry.IsSwiftIsa = false;
     Entry.Alignment = Align;
     CLI.getArgs().insert(CLI.getArgs().begin(), Entry);
     CLI.RetTy = Type::getVoidTy(CLI.RetTy->getContext());
@@ -8113,6 +8114,8 @@ TargetLowering::LowerCallTo(TargetLowering::CallLoweringInfo &CLI) const {
         Flags.setSwiftSelf();
       if (Args[i].IsSwiftError)
         Flags.setSwiftError();
+      if (Args[i].IsSwiftIsa)
+        Flags.setSwiftIsa();
       if (Args[i].IsByVal)
         Flags.setByVal();
       if (Args[i].IsInAlloca) {
@@ -8595,6 +8598,8 @@ void SelectionDAGISel::LowerArguments(const Function &F) {
         Flags.setSwiftSelf();
       if (Arg.hasAttribute(Attribute::SwiftError))
         Flags.setSwiftError();
+      if (Arg.hasAttribute(Attribute::SwiftIsa))
+        Flags.setSwiftIsa();
       if (Arg.hasAttribute(Attribute::ByVal))
         Flags.setByVal();
       if (Arg.hasAttribute(Attribute::InAlloca)) {

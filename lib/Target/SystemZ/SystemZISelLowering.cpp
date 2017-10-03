@@ -1130,7 +1130,8 @@ static bool canUseSiblingCall(const CCState &ArgCCInfo,
     unsigned Reg = VA.getLocReg();
     if (Reg == SystemZ::R6H || Reg == SystemZ::R6L || Reg == SystemZ::R6D)
       return false;
-    if (Outs[I].Flags.isSwiftSelf() || Outs[I].Flags.isSwiftError())
+    if (Outs[I].Flags.isSwiftSelf() || Outs[I].Flags.isSwiftError() ||
+        Outs[I].Flags.isSwiftIsa())
       return false;
   }
   return true;

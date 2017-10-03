@@ -69,6 +69,9 @@ public:
   /// Return true if this argument has the swiftself attribute.
   bool hasSwiftSelfAttr() const;
 
+  /// Return true if this argument has the swiftisa attribute.
+  bool hasSwiftIsaAttr() const;
+
   /// Return true if this argument has the swifterror attribute.
   bool hasSwiftErrorAttr() const;
 

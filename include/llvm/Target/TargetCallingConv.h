@@ -38,6 +38,7 @@ namespace ISD {
     unsigned IsSplitEnd : 1;   ///< Last part of a split
     unsigned IsSwiftSelf : 1;  ///< Swift self parameter
     unsigned IsSwiftError : 1; ///< Swift error parameter
+    unsigned IsSwiftIsa : 1;  ///< Swift isa parameter
     unsigned IsHva : 1;        ///< HVA field for
     unsigned IsHvaStart : 1;   ///< HVA structure start
     unsigned IsSecArgPass : 1; ///< Second argument
@@ -53,7 +54,7 @@ namespace ISD {
     ArgFlagsTy()
         : IsZExt(0), IsSExt(0), IsInReg(0), IsSRet(0), IsByVal(0), IsNest(0),
           IsReturned(0), IsSplit(0), IsInAlloca(0), IsSplitEnd(0),
-          IsSwiftSelf(0), IsSwiftError(0), IsHva(0), IsHvaStart(0),
+          IsSwiftSelf(0), IsSwiftError(0), IsSwiftIsa(0), IsHva(0), IsHvaStart(0),
           IsSecArgPass(0), ByValAlign(0), OrigAlign(0),
           IsInConsecutiveRegsLast(0), IsInConsecutiveRegs(0),
           IsCopyElisionCandidate(0), ByValSize(0) {
@@ -83,6 +84,9 @@ namespace ISD {
 
     bool isSwiftError() const { return IsSwiftError; }
     void setSwiftError() { IsSwiftError = 1; }
+
+    bool isSwiftIsa() const { return IsSwiftIsa; }
+    void setSwiftIsa() { IsSwiftIsa = 1; }
 
     bool isHva() const { return IsHva; }
     void setHva() { IsHva = 1; }

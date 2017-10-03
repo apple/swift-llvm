@@ -494,6 +494,9 @@ def CC_X86_64_C : CallingConv<[
   CCIfNest<CCIfSubtarget<"isTarget64BitILP32()", CCAssignToReg<[R10D]>>>,
   CCIfNest<CCAssignToReg<[R10]>>,
 
+  // Pass SwiftIsa in a callee saved register.
+  CCIfSwiftIsa<CCIfType<[i64], CCAssignToReg<[R14]>>>,
+
   // Pass SwiftSelf in a callee saved register.
   CCIfSwiftSelf<CCIfType<[i64], CCAssignToReg<[R13]>>>,
 

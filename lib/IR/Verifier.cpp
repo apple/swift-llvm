@@ -1529,6 +1529,7 @@ void Verifier::verifyFunctionAttrs(FunctionType *FT, AttributeList Attrs,
   bool SawReturned = false;
   bool SawSRet = false;
   bool SawSwiftSelf = false;
+  bool SawSwiftIsa = false;
   bool SawSwiftError = false;
 
   // Verify return value attributes.
@@ -1540,10 +1541,11 @@ void Verifier::verifyFunctionAttrs(FunctionType *FT, AttributeList Attrs,
           !RetAttrs.hasAttribute(Attribute::Returned) &&
           !RetAttrs.hasAttribute(Attribute::InAlloca) &&
           !RetAttrs.hasAttribute(Attribute::SwiftSelf) &&
+          !RetAttrs.hasAttribute(Attribute::SwiftIsa) &&
           !RetAttrs.hasAttribute(Attribute::SwiftError)),
          "Attributes 'byval', 'inalloca', 'nest', 'sret', 'nocapture', "
-         "'returned', 'swiftself', and 'swifterror' do not apply to return "
-         "values!",
+         "'returned', 'swiftself', 'swiftisa' and 'swifterror' do not "
+         "apply to return values!",
          V);
   Assert((!RetAttrs.hasAttribute(Attribute::ReadOnly) &&
           !RetAttrs.hasAttribute(Attribute::WriteOnly) &&
@@ -1584,6 +1586,11 @@ void Verifier::verifyFunctionAttrs(FunctionType *FT, AttributeList Attrs,
     if (ArgAttrs.hasAttribute(Attribute::SwiftSelf)) {
       Assert(!SawSwiftSelf, "Cannot have multiple 'swiftself' parameters!", V);
       SawSwiftSelf = true;
+    }
+
+    if (ArgAttrs.hasAttribute(Attribute::SwiftIsa)) {
+      Assert(!SawSwiftIsa, "Cannot have multiple 'swiftisa' parameters!", V);
+      SawSwiftIsa = true;
     }
 
     if (ArgAttrs.hasAttribute(Attribute::SwiftError)) {

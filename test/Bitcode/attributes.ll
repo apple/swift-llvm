@@ -305,6 +305,12 @@ define i32 @f52(i32, i8** swifterror)
   ret i32 0
 }
 
+; CHECK: define void @f52a(i8* swiftisa)
+define void @f52a(i8* swiftisa)
+{
+  ret void;
+}
+
 %swift_error = type {i64, i8}
 declare float @foo(%swift_error** swifterror %error_ptr_ref)
 

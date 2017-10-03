@@ -209,6 +209,7 @@ enum Kind {
   kw_sanitize_memory,
   kw_swifterror,
   kw_swiftself,
+  kw_swiftisa,
   kw_uwtable,
   kw_writeonly,
   kw_zeroext,

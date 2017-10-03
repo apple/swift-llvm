@@ -167,6 +167,9 @@ def SwiftError : EnumAttr<"swifterror">;
 /// Argument is swift self/context.
 def SwiftSelf : EnumAttr<"swiftself">;
 
+/// Argument is swift isa pointer.
+def SwiftIsa : EnumAttr<"swiftisa">;
+
 /// Function must be in a unwind table.
 def UWTable : EnumAttr<"uwtable">;
 

@@ -47,6 +47,11 @@ class CCIfByVal<CCAction A> : CCIf<"ArgFlags.isByVal()", A> {
 class CCIfSwiftSelf<CCAction A> : CCIf<"ArgFlags.isSwiftSelf()", A> {
 }
 
+/// CCIfSwiftIsa - If the current argument has swiftisa parameter attribute,
+/// apply Action A.
+class CCIfSwiftIsa<CCAction A> : CCIf<"ArgFlags.isSwiftIsa()", A> {
+}
+
 /// CCIfSwiftError - If the current argument has swifterror parameter attribute,
 /// apply Action A.
 class CCIfSwiftError<CCAction A> : CCIf<"ArgFlags.isSwiftError()", A> {

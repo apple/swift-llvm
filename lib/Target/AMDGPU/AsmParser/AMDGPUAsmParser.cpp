@@ -3088,7 +3088,7 @@ OperandMatchResultTy AMDGPUAsmParser::parseHwreg(OperandVector &Operands) {
       if (Imm16Val < 0 || !isUInt<16>(Imm16Val)) {
         Error(S, "invalid immediate: only 16-bit values are legal");
         // Do not return error code, but create an imm operand anyway and proceed
-        // to the next operand, if any. That avoids unneccessary error messages.
+        // to the next operand, if any. That avoids unnecessary error messages.
       }
       break;
 
@@ -3377,7 +3377,7 @@ AMDGPUAsmParser::parseSendMsgOp(OperandVector &Operands) {
     if (Imm16Val < 0 || !isUInt<16>(Imm16Val)) {
       Error(S, "invalid immediate: only 16-bit values are legal");
       // Do not return error code, but create an imm operand anyway and proceed
-      // to the next operand, if any. That avoids unneccessary error messages.
+      // to the next operand, if any. That avoids unnecessary error messages.
     }
     break;
   case AsmToken::Identifier: {

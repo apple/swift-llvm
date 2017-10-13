@@ -82,7 +82,7 @@ define i1 @test1(i32* %p, i1 %unknown) {
 
 next:
   %min = select i1 %unknown, i32 %pval, i32 5
-  ;; TODO: This pointless branch shouldn't be neccessary
+  ;; TODO: This pointless branch shouldn't be necessary
   br label %next2
 next2:
 ; CHECK-LABEL: next2:
@@ -105,7 +105,7 @@ define i1 @test2(i32* %p, i32 %qval, i1 %unknown) {
 
 next:
   %min = select i1 %unknown, i32 %pval, i32 %qval
-  ;; TODO: This pointless branch shouldn't be neccessary
+  ;; TODO: This pointless branch shouldn't be necessary
   br label %next2
 next2:
 ; CHECK-LABEL: next2
@@ -128,7 +128,7 @@ define i1 @test3(i32* %p, i32 %qval, i1 %unknown) {
 
 next:
   %min = select i1 %unknown, i32 %qval, i32 %pval
-  ;; TODO: This pointless branch shouldn't be neccessary
+  ;; TODO: This pointless branch shouldn't be necessary
   br label %next2
 next2:
 ; CHECK-LABEL: next2
@@ -154,7 +154,7 @@ define i1 @test4(i32* %p, i32 %qval, i1 %unknown) {
 
 next:
   %min = select i1 %unknown, double 1.0, double 0.0
-  ;; TODO: This pointless branch shouldn't be neccessary
+  ;; TODO: This pointless branch shouldn't be necessary
   br label %next2
 next2:
 ; CHECK-LABEL: next2
@@ -180,7 +180,7 @@ define i1 @test5(i32* %p, i1 %unknown) {
 next:
   %cond = icmp sgt i32 %pval, 0
   %min = select i1 %cond, i32 %pval, i32 5
-  ;; TODO: This pointless branch shouldn't be neccessary
+  ;; TODO: This pointless branch shouldn't be necessary
   br label %next2
 next2:
 ; CHECK-LABEL: next2:
@@ -203,7 +203,7 @@ define i1 @test6(i32* %p, i1 %unknown) {
 next:
   %cond = icmp ne i32 %pval, 254
   %sel = select i1 %cond, i32 %pval, i32 1
-  ;; TODO: This pointless branch shouldn't be neccessary
+  ;; TODO: This pointless branch shouldn't be necessary
   br label %next2
 next2:
 ; CHECK-LABEL: next2:

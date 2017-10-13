@@ -293,13 +293,13 @@ void Fuzzer::CrashResistantMerge(const std::vector<std::string> &Args,
     auto ExitCode = ExecuteCommand(BaseCmd.first + " -merge_control_file=" +
                                    CFPath + " " + BaseCmd.second);
     if (!ExitCode) {
-      Printf("MERGE-OUTER: succesfull in %zd attempt(s)\n", i);
+      Printf("MERGE-OUTER: successful in %zd attempt(s)\n", i);
       Success = true;
       break;
     }
   }
   if (!Success) {
-    Printf("MERGE-OUTER: zero succesfull attempts, exiting\n");
+    Printf("MERGE-OUTER: zero successful attempts, exiting\n");
     exit(1);
   }
   // Read the control file and do the merge.

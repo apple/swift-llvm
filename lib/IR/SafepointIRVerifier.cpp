@@ -15,7 +15,7 @@
 // safepoint semenatics.
 //
 // In its current form, this verify checks a property which is sufficient, but
-// not neccessary for correctness.  There are some cases where an unrelocated
+// not necessary for correctness.  There are some cases where an unrelocated
 // pointer can be used after the safepoint.  Consider this example:
 //
 //    a = ...
@@ -166,7 +166,7 @@ static void GatherDominatingDefs(const BasicBlock *BB,
     const auto &Defs = BlockMap[DTN->getBlock()]->Contribution;
     Result.insert(Defs.begin(), Defs.end());
     // If this block is 'Cleared', then nothing LiveIn to this block can be
-    // available after this block completes.  Note: This turns out to be 
+    // available after this block completes.  Note: This turns out to be
     // really important for reducing memory consuption of the initial available
     // sets and thus peak memory usage by this verifier.
     if (BlockMap[DTN->getBlock()]->Cleared)
@@ -195,7 +195,7 @@ static void TransferInstruction(const Instruction &I, bool &Cleared,
 static void TransferBlock(const BasicBlock *BB,
                           BasicBlockState &BBS, bool FirstPass) {
 
-  const DenseSet<const Value *> &AvailableIn = BBS.AvailableIn; 
+  const DenseSet<const Value *> &AvailableIn = BBS.AvailableIn;
   DenseSet<const Value *> &AvailableOut  = BBS.AvailableOut;
 
   if (BBS.Cleared) {
@@ -294,7 +294,7 @@ static enum BaseType getBaseType(const Value *Val) {
 static void Verify(const Function &F, const DominatorTree &DT) {
   SpecificBumpPtrAllocator<BasicBlockState> BSAllocator;
   DenseMap<const BasicBlock *, BasicBlockState *> BlockMap;
- 
+
   DEBUG(dbgs() << "Verifying gc pointers in function: " << F.getName() << "\n");
   if (PrintOnly)
     dbgs() << "Verifying gc pointers in function: " << F.getName() << "\n";

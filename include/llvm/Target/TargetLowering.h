@@ -186,12 +186,13 @@ public:
     bool IsReturned : 1;
     bool IsSwiftSelf : 1;
     bool IsSwiftError : 1;
+    bool IsSwiftIsa : 1;
     uint16_t Alignment = 0;
 
     ArgListEntry()
         : IsSExt(false), IsZExt(false), IsInReg(false), IsSRet(false),
           IsNest(false), IsByVal(false), IsInAlloca(false), IsReturned(false),
-          IsSwiftSelf(false), IsSwiftError(false) {}
+          IsSwiftSelf(false), IsSwiftError(false), IsSwiftIsa(false) {}
 
     void setAttributes(ImmutableCallSite *CS, unsigned ArgIdx);
   };

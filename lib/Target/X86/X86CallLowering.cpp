@@ -301,6 +301,7 @@ bool X86CallLowering::lowerFormalArguments(MachineIRBuilder &MIRBuilder,
         Arg.hasAttribute(Attribute::StructRet) ||
         Arg.hasAttribute(Attribute::SwiftSelf) ||
         Arg.hasAttribute(Attribute::SwiftError) ||
+        Arg.hasAttribute(Attribute::SwiftIsa) ||
         Arg.hasAttribute(Attribute::Nest))
       return false;
 

@@ -992,6 +992,8 @@ bool FastISel::lowerCallTo(CallLoweringInfo &CLI) {
       Flags.setSwiftSelf();
     if (Arg.IsSwiftError)
       Flags.setSwiftError();
+    if (Arg.IsSwiftIsa)
+      Flags.setSwiftIsa();
     if (Arg.IsByVal)
       Flags.setByVal();
     if (Arg.IsInAlloca) {

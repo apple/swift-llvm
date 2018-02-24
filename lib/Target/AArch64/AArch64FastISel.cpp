@@ -3177,7 +3177,7 @@ bool AArch64FastISel::fastLowerCall(CallLoweringInfo &CLI) {
 
   for (auto Flag : CLI.OutFlags)
     if (Flag.isInReg() || Flag.isSRet() || Flag.isNest() || Flag.isByVal() ||
-        Flag.isSwiftSelf() || Flag.isSwiftError())
+        Flag.isSwiftSelf() || Flag.isSwiftError() || Flag.isSwiftIsa())
       return false;
 
   // Set up the argument vectors.

@@ -23,6 +23,9 @@ def CC_ARM_APCS : CallingConv<[
     
   CCIfType<[i1, i8, i16], CCPromoteToType<i32>>,
 
+  // Pass SwiftIsa in a callee saved register.
+  CCIfSwiftIsa<CCIfType<[i32], CCAssignToReg<[R11]>>>,
+
   // Pass SwiftSelf in a callee saved register.
   CCIfSwiftSelf<CCIfType<[i32], CCAssignToReg<[R10]>>>,
 

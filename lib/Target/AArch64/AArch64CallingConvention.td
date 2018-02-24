@@ -52,6 +52,9 @@ def CC_AArch64_AAPCS : CallingConv<[
   // A SwiftError is passed in X21.
   CCIfSwiftError<CCIfType<[i64], CCAssignToRegWithShadow<[X21], [W21]>>>,
 
+  // A SwiftIsa is passed in X22.
+  CCIfSwiftIsa<CCIfType<[i64], CCAssignToRegWithShadow<[X22], [W22]>>>,
+
   CCIfConsecutiveRegs<CCCustom<"CC_AArch64_Custom_Block">>,
 
   // Handle i1, i8, i16, i32, i64, f32, f64 and v2f64 by passing in registers,

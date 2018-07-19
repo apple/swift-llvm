@@ -111,6 +111,22 @@ template <> struct PointerLikeTypeTraits<uintptr_t> {
   enum { NumLowBitsAvailable = 0 };
 };
 
+// Provide PointerLikeTypeTraits for function pointers.
+template <typename Ret, typename ...Args>
+struct PointerLikeTypeTraits<Ret(*)(Args...)> {
+  using FnType = Ret(*)(Args...);
+
+  static inline void *getAsVoidPointer(FnType P) {
+    return reinterpret_cast<void *>(P);
+  }
+  static inline uintptr_t getFromVoidPointer(void *P) {
+    return reinterpret_cast<FnType>(P);
+  }
+
+  // Don't assume anything about the alignment of functions.
+  enum { NumLowBitsAvailable = 0 };
+};
+
 } // end namespace llvm
 
 #endif

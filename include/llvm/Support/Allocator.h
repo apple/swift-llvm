@@ -209,10 +209,13 @@ public:
     Slabs.erase(std::next(Slabs.begin()), Slabs.end());
   }
 
-  /// Allocate space at the specified alignment.
-  LLVM_ATTRIBUTE_RETURNS_NONNULL LLVM_ATTRIBUTE_RETURNS_NOALIAS void *
+  /// Allocate space at the specified alignment. Returns null if 
+  /// \a Size is zero; this does not indicate an error.
+  LLVM_ATTRIBUTE_RETURNS_NOALIAS void *
   Allocate(size_t Size, size_t Alignment) {
-    assert(Alignment > 0 && "0-byte alignnment is not allowed. Use 1 instead.");
+    assert(Alignment > 0 && "0-byte alignment is not allowed. Use 1 instead.");
+    if (Size == 0)
+      return nullptr;
 
     // Keep track of how many bytes we've allocated.
     BytesAllocated += Size;

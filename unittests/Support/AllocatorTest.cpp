@@ -185,4 +185,15 @@ TEST(AllocatorTest, TestBigAlignment) {
   EXPECT_GT(MockSlabAllocator::GetLastSlabSize(), 4096u);
 }
 
+// Test that Allocate() behaves properly when asked to allocate zero bytes.
+TEST(AllocatorTest, EmptyAllocation) {
+  BumpPtrAllocator Alloc;
+
+  void *a = Alloc.Allocate(0, 1);
+  EXPECT_EQ(a, nullptr);
+  
+  void *b = Alloc.Allocate<int>(0);
+  EXPECT_EQ(b, nullptr);
+}
+
 }  // anonymous namespace

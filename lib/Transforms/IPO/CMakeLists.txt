@@ -25,6 +25,7 @@ add_llvm_library(LLVMipo
   LoopExtractor.cpp
   LowerTypeTests.cpp
   MergeFunctions.cpp
+  MergeSimilarFunctions.cpp
   PartialInlining.cpp
   PassManagerBuilder.cpp
   PruneEH.cpp

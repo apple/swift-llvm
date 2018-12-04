@@ -70,7 +70,7 @@ static cl::opt<bool> EnableStaticAnalyis("hot-cold-static-analysis",
                               cl::init(true), cl::Hidden);
 
 static cl::opt<int>
-    MinOutliningThreshold("min-outlining-thresh", cl::init(3), cl::Hidden,
+    MinOutliningThreshold("min-outlining-thresh", cl::init(10), cl::Hidden,
                           cl::desc("Code size threshold for outlining within a "
                                    "single BB (as a multiple of TCC_Basic)"));
 

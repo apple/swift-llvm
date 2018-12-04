@@ -895,11 +895,19 @@ emitCallAndSwitchStatement(Function *newFunction, BasicBlock *codeReplacer,
   const DataLayout &DL = M->getDataLayout();
 
   // Add inputs as params, or to be filled into the struct
-  for (Value *input : inputs)
+  unsigned ArgNo = 0;
+  SmallVector<unsigned, 1> SwiftErrorArgs;
+  for (Value *input : inputs) {
     if (AggregateArgs)
       StructValues.push_back(input);
-    else
+    else {
       params.push_back(input);
+      if (auto *Alloca = dyn_cast<AllocaInst>(input))
+        if (Alloca->isSwiftError())
+          SwiftErrorArgs.push_back(ArgNo);
+    }
+    ++ArgNo;
+  }
 
   // Create allocas for the outputs
   for (Value *output : outputs) {
@@ -954,6 +962,12 @@ emitCallAndSwitchStatement(Function *newFunction, BasicBlock *codeReplacer,
       call->setDebugLoc(DL);
   }
   codeReplacer->getInstList().push_back(call);
+
+  // Set swifterror parameter attributes.
+  for (unsigned SwiftErrArgNo : SwiftErrorArgs) {
+    call->addParamAttr(SwiftErrArgNo, Attribute::SwiftError);
+    newFunction->addParamAttr(SwiftErrArgNo, Attribute::SwiftError);
+  }
 
   Function::arg_iterator OutputArgBegin = newFunction->arg_begin();
   unsigned FirstOut = inputs.size();
@@ -1370,7 +1384,8 @@ Function *CodeExtractor::extractCodeRegion() {
 
   // Mark the new function `noreturn` if applicable.
   bool doesNotReturn = none_of(*newFunction, [](const BasicBlock &BB) {
-    return isa<ReturnInst>(BB.getTerminator());
+  	auto *Term = BB.getTerminator();
+    return isa<ReturnInst>(Term) || isa<CatchReturnInst>(Term) || isa<ResumeInst>(Term);
   });
   if (doesNotReturn)
     newFunction->setDoesNotReturn();

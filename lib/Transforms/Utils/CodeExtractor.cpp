@@ -1370,7 +1370,8 @@ Function *CodeExtractor::extractCodeRegion() {
 
   // Mark the new function `noreturn` if applicable.
   bool doesNotReturn = none_of(*newFunction, [](const BasicBlock &BB) {
-    return isa<ReturnInst>(BB.getTerminator());
+  	auto *Term = BB.getTerminator();
+    return isa<ReturnInst>(Term) || isa<CatchReturnInst>(Term) || isa<ResumeInst>(Term);
   });
   if (doesNotReturn)
     newFunction->setDoesNotReturn();

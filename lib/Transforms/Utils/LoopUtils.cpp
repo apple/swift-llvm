@@ -1482,7 +1482,7 @@ void llvm::deleteDeadLoop(Loop *L, DominatorTree *DT = nullptr,
   DIBuilder DIB(*ExitBlock->getModule());
   for (auto *DVI : DeadDebugInst)
     DIB.insertDbgValueIntrinsic(
-        UndefValue::get(DVI->getType()), DVI->getVariable(),
+        UndefValue::get(Builder.getInt32Ty()), DVI->getVariable(),
         DVI->getExpression(), DVI->getDebugLoc(), ExitBlock->getFirstNonPHI());
 
   // Remove the block from the reference counting scheme, so that we can

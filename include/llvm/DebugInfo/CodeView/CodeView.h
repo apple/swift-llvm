@@ -159,6 +159,7 @@ enum SourceLanguage : uint8_t {
   JScript = 0x0e,
   MSIL = 0x0f,
   HLSL = 0x10,
+  Swift = 0x11,
 
   /// The DMD compiler emits 'D' for the CV source language. Microsoft doesn't
   /// have an enumerator for it yet.

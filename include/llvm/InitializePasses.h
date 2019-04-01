@@ -272,6 +272,7 @@ void initializeMemorySSAPrinterLegacyPassPass(PassRegistry&);
 void initializeMemorySSAWrapperPassPass(PassRegistry&);
 void initializeMemorySanitizerPass(PassRegistry&);
 void initializeMergeFunctionsPass(PassRegistry&);
+void initializeMergeSimilarFunctionsPass(PassRegistry &);
 void initializeMergeICmpsPass(PassRegistry&);
 void initializeMergedLoadStoreMotionLegacyPassPass(PassRegistry&);
 void initializeMetaRenamerPass(PassRegistry&);

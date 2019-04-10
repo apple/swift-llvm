@@ -1682,6 +1682,10 @@ static SectionKind getWasmKindForNamedSection(StringRef Name, SectionKind K) {
   if (K.isText())
     return SectionKind::getText();
 
+  // Clang precompiled header data isn't needed at runtime; use custom section
+  if (Name == "__clangast")
+    return SectionKind::getMetadata();
+
   // Otherwise, ignore whatever section type the generic impl detected and use
   // a plain data section.
   return SectionKind::getData();

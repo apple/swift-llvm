@@ -493,8 +493,8 @@ void WasmObjectWriter::recordRelocation(MCAssembler &Asm,
 
   if (SymA && SymA->isVariable()) {
     const MCExpr *Expr = SymA->getVariableValue();
-    const auto *Inner = cast<MCSymbolRefExpr>(Expr);
-    if (Inner->getKind() == MCSymbolRefExpr::VK_WEAKREF)
+    const auto *Inner = dyn_cast<MCSymbolRefExpr>(Expr);
+    if (Inner && Inner->getKind() == MCSymbolRefExpr::VK_WEAKREF)
       llvm_unreachable("weakref used in reloc not yet implemented");
   }
 
@@ -554,6 +554,50 @@ void WasmObjectWriter::recordRelocation(MCAssembler &Asm,
   } else {
     llvm_unreachable("unexpected section type");
   }
+}
+
+// Write X as an (unsigned) LEB value at offset Offset in Stream, padded
+// to allow patching.
+static void WritePatchableLEB(raw_pwrite_stream &Stream, uint32_t X,
+                              uint64_t Offset) {
+  uint8_t Buffer[5];
+  unsigned SizeLen = encodeULEB128(X, Buffer, 5);
+  assert(SizeLen == 5);
+  Stream.pwrite((char *)Buffer, SizeLen, Offset);
+}
+
+// Write X as an signed LEB value at offset Offset in Stream, padded
+// to allow patching.
+static void WritePatchableSLEB(raw_pwrite_stream &Stream, int32_t X,
+                               uint64_t Offset) {
+  uint8_t Buffer[5];
+  unsigned SizeLen = encodeSLEB128(X, Buffer, 5);
+  assert(SizeLen == 5);
+  Stream.pwrite((char *)Buffer, SizeLen, Offset);
+}
+
+// Write X as a plain integer value at offset Offset in Stream.
+static void WriteI32(raw_pwrite_stream &Stream, uint32_t X, uint64_t Offset) {
+  uint8_t Buffer[4];
+  support::endian::write32le(Buffer, X);
+  Stream.pwrite((char *)Buffer, sizeof(Buffer), Offset);
+}
+
+static const MCSymbolRefExpr* pullSymbol(const MCExpr *TheExpr) {
+  if (!TheExpr) return nullptr;
+  const MCSymbolRefExpr* S = dyn_cast<MCSymbolRefExpr>(TheExpr);
+  if (S) return S;
+  const MCBinaryExpr* Expr = dyn_cast<MCBinaryExpr>(TheExpr);
+  if (!Expr) return nullptr;
+  S = dyn_cast_or_null<MCSymbolRefExpr>(Expr->getLHS());
+  if (S) return S;
+  S = dyn_cast_or_null<MCSymbolRefExpr>(Expr->getRHS());
+  if (S) return S;
+  S = pullSymbol(Expr->getLHS());
+  if (S) return S;
+  S = pullSymbol(Expr->getRHS());
+  if (S) return S;
+  return nullptr;
 }
 
 static const MCSymbolWasm *resolveSymbol(const MCSymbolWasm &Symbol) {

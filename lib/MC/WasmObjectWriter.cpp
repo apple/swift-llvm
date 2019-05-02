@@ -496,6 +496,10 @@ void WasmObjectWriter::recordRelocation(MCAssembler &Asm,
     const auto *Inner = dyn_cast<MCSymbolRefExpr>(Expr);
     if (Inner && Inner->getKind() == MCSymbolRefExpr::VK_WEAKREF)
       llvm_unreachable("weakref used in reloc not yet implemented");
+    if (!Inner) {
+      fprintf(stderr, "weak check failed to get an inner:\n");
+      Expr->dump();
+    }
   }
 
   // Put any constant offset in an addend. Offsets can be negative, and

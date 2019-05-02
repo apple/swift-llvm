@@ -1199,6 +1199,23 @@ static bool isInSymtab(const MCSymbolWasm &Sym) {
   return true;
 }
 
+// SwiftWasm: takes a MCSymbolWasm that's an alias expression of the form
+// ((targetSymbol + constantA) - constantB) + constantC...)
+// return the final offset from targetSymbol.
+// if no offset, returns 0.
+static int64_t getAliasedSymbolOffset(const MCSymbolWasm &Symbol,
+                                      const MCAsmLayout &Layout) {
+  if (!Symbol.isVariable())
+    return 0;
+  const MCExpr *Expr = Symbol.getVariableValue();
+  MCValue Res;
+  if (!Expr->evaluateAsRelocatable(Res, &Layout, nullptr)) {
+    Expr->dump();
+    report_fatal_error("Can't evaluate alias symbol expression");
+  }
+  return Res.getConstant();
+}
+
 uint64_t WasmObjectWriter::writeObject(MCAssembler &Asm,
                                        const MCAsmLayout &Layout) {
   uint64_t StartOffset = W.OS.tell();
@@ -1519,8 +1536,16 @@ uint64_t WasmObjectWriter::writeObject(MCAssembler &Asm,
       LLVM_DEBUG(dbgs() << "  -> index:" << WasmIndex << "\n");
     } else if (ResolvedSym->isData()) {
       assert(DataLocations.count(ResolvedSym) > 0);
-      const wasm::WasmDataReference &Ref =
+      // SwiftWasm: hack: grab the offset
+      // Swift has aliases of the form
+      // alias = ((symbol + constant) - constant)
+      // so we need to evaluate the constants here using MCExpr
+      // there's probably a proper way to do this.
+      int64_t Offset = getAliasedSymbolOffset(WS, Layout);
+      wasm::WasmDataReference Ref =
           DataLocations.find(ResolvedSym)->second;
+      Ref.Offset += Offset;
+      Ref.Size -= Offset;
       DataLocations[&WS] = Ref;
       LLVM_DEBUG(dbgs() << "  -> index:" << Ref.Segment << "\n");
     } else {

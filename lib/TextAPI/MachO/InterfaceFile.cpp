@@ -14,15 +14,19 @@
 #include <iomanip>
 #include <sstream>
 
+using namespace llvm::MachO;
+
 namespace llvm {
 namespace MachO {
 namespace detail {
 template <typename C>
 typename C::iterator addEntry(C &Container, StringRef InstallName) {
-  auto I = partition_point(Container, [=](const InterfaceFileRef &O) {
-    return O.getInstallName() < InstallName;
-  });
-  if (I != Container.end() && I->getInstallName() == InstallName)
+  auto I =
+      std::lower_bound(std::begin(Container), std::end(Container), InstallName,
+                       [](const InterfaceFileRef &LHS, const StringRef &RHS) {
+                         return LHS.getInstallName() < RHS;
+                       });
+  if ((I != std::end(Container)) && !(InstallName < I->getInstallName()))
     return I;
 
   return Container.emplace(I, InstallName);
@@ -42,12 +46,11 @@ void InterfaceFile::addReexportedLibrary(StringRef InstallName,
 }
 
 void InterfaceFile::addUUID(Architecture Arch, StringRef UUID) {
-  auto I = partition_point(UUIDs,
-                           [=](const std::pair<Architecture, std::string> &O) {
-                             return O.first < Arch;
-                           });
+  auto I = std::lower_bound(UUIDs.begin(), UUIDs.end(), Arch,
+                            [](const std::pair<Architecture, std::string> &LHS,
+                               Architecture RHS) { return LHS.first < RHS; });
 
-  if (I != UUIDs.end() && Arch == I->first) {
+  if ((I != UUIDs.end()) && !(Arch < I->first)) {
     I->second = UUID;
     return;
   }

@@ -473,10 +473,9 @@ public:
   DWARFDie getDIEForOffset(uint64_t Offset) {
     extractDIEsIfNeeded(false);
     assert(!DieArray.empty());
-    auto It =
-        llvm::partition_point(DieArray, [=](const DWARFDebugInfoEntry &DIE) {
-          return DIE.getOffset() < Offset;
-        });
+    auto It = llvm::bsearch(DieArray, [=](const DWARFDebugInfoEntry &LHS) {
+      return Offset <= LHS.getOffset();
+    });
     if (It != DieArray.end() && It->getOffset() == Offset)
       return DWARFDie(this, &*It);
     return DWARFDie();

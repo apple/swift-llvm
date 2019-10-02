@@ -308,6 +308,20 @@ class raw_ostream;
 
   using IdxMBBPair = std::pair<SlotIndex, MachineBasicBlock *>;
 
+  inline bool operator<(SlotIndex V, const IdxMBBPair &IM) {
+    return V < IM.first;
+  }
+
+  inline bool operator<(const IdxMBBPair &IM, SlotIndex V) {
+    return IM.first < V;
+  }
+
+  struct Idx2MBBCompare {
+    bool operator()(const IdxMBBPair &LHS, const IdxMBBPair &RHS) const {
+      return LHS.first < RHS.first;
+    }
+  };
+
   /// SlotIndexes pass.
   ///
   /// This pass assigns indexes to each instruction.
@@ -499,9 +513,7 @@ class raw_ostream;
     /// Move iterator to the next IdxMBBPair where the SlotIndex is greater or
     /// equal to \p To.
     MBBIndexIterator advanceMBBIndex(MBBIndexIterator I, SlotIndex To) const {
-      return std::partition_point(
-          I, idx2MBBMap.end(),
-          [=](const IdxMBBPair &IM) { return IM.first < To; });
+      return std::lower_bound(I, idx2MBBMap.end(), To);
     }
 
     /// Get an iterator pointing to the IdxMBBPair with the biggest SlotIndex
@@ -665,7 +677,7 @@ class raw_ostream;
       idx2MBBMap.push_back(IdxMBBPair(startIdx, mbb));
 
       renumberIndexes(newItr);
-      llvm::sort(idx2MBBMap, less_first());
+      llvm::sort(idx2MBBMap, Idx2MBBCompare());
     }
 
     /// Free the resources that were required to maintain a SlotIndex.

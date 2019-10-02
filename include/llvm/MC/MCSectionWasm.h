@@ -66,8 +66,7 @@ public:
   bool isVirtualSection() const override;
 
   bool isWasmData() const {
-    return Kind.isGlobalWriteableData() || Kind.isReadOnly() ||
-           Kind.isThreadLocal();
+    return Kind.isGlobalWriteableData() || Kind.isReadOnly();
   }
 
   bool isUnique() const { return UniqueID != ~0U; }

@@ -88,7 +88,6 @@ bool MCWasmStreamer::EmitSymbolAttribute(MCSymbol *S, MCSymbolAttr Attribute) {
   getAssembler().registerSymbol(*Symbol);
 
   switch (Attribute) {
-  case MCSA_Cold:
   case MCSA_LazyReference:
   case MCSA_Reference:
   case MCSA_SymbolResolver:

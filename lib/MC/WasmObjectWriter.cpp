@@ -372,7 +372,15 @@ void WasmObjectWriter::startCustomSection(SectionBookkeeping &Section,
   Section.PayloadOffset = W.OS.tell();
 
   // Custom sections in wasm also have a string identifier.
-  writeString(Name);
+  if (Name != "__clangast") {
+    writeString(Name);
+  } else {
+    // pad section start to nearest 4 bytes for Clang PCH
+    uint64_t MinLength = Section.PayloadOffset + 5ULL /* min ULEB128 length */ + Name.size();
+    uint64_t RoundedUpLength = (MinLength + 3ULL) & ~3ULL;
+    encodeULEB128(Name.size(), W.OS, 5 + (RoundedUpLength - MinLength));
+    W.OS << Name;
+  }
 
   // The position where the custom section starts.
   Section.ContentsOffset = W.OS.tell();
@@ -485,8 +493,8 @@ void WasmObjectWriter::recordRelocation(MCAssembler &Asm,
 
   if (SymA && SymA->isVariable()) {
     const MCExpr *Expr = SymA->getVariableValue();
-    const auto *Inner = cast<MCSymbolRefExpr>(Expr);
-    if (Inner->getKind() == MCSymbolRefExpr::VK_WEAKREF)
+    const auto *Inner = dyn_cast<MCSymbolRefExpr>(Expr);
+    if (Inner && Inner->getKind() == MCSymbolRefExpr::VK_WEAKREF)
       llvm_unreachable("weakref used in reloc not yet implemented");
   }
 
@@ -546,6 +554,50 @@ void WasmObjectWriter::recordRelocation(MCAssembler &Asm,
   } else {
     llvm_unreachable("unexpected section type");
   }
+}
+
+// Write X as an (unsigned) LEB value at offset Offset in Stream, padded
+// to allow patching.
+static void WritePatchableLEB(raw_pwrite_stream &Stream, uint32_t X,
+                              uint64_t Offset) {
+  uint8_t Buffer[5];
+  unsigned SizeLen = encodeULEB128(X, Buffer, 5);
+  assert(SizeLen == 5);
+  Stream.pwrite((char *)Buffer, SizeLen, Offset);
+}
+
+// Write X as an signed LEB value at offset Offset in Stream, padded
+// to allow patching.
+static void WritePatchableSLEB(raw_pwrite_stream &Stream, int32_t X,
+                               uint64_t Offset) {
+  uint8_t Buffer[5];
+  unsigned SizeLen = encodeSLEB128(X, Buffer, 5);
+  assert(SizeLen == 5);
+  Stream.pwrite((char *)Buffer, SizeLen, Offset);
+}
+
+// Write X as a plain integer value at offset Offset in Stream.
+static void WriteI32(raw_pwrite_stream &Stream, uint32_t X, uint64_t Offset) {
+  uint8_t Buffer[4];
+  support::endian::write32le(Buffer, X);
+  Stream.pwrite((char *)Buffer, sizeof(Buffer), Offset);
+}
+
+static const MCSymbolRefExpr* pullSymbol(const MCExpr *TheExpr) {
+  if (!TheExpr) return nullptr;
+  const MCSymbolRefExpr* S = dyn_cast<MCSymbolRefExpr>(TheExpr);
+  if (S) return S;
+  const MCBinaryExpr* Expr = dyn_cast<MCBinaryExpr>(TheExpr);
+  if (!Expr) return nullptr;
+  S = dyn_cast_or_null<MCSymbolRefExpr>(Expr->getLHS());
+  if (S) return S;
+  S = dyn_cast_or_null<MCSymbolRefExpr>(Expr->getRHS());
+  if (S) return S;
+  S = pullSymbol(Expr->getLHS());
+  if (S) return S;
+  S = pullSymbol(Expr->getRHS());
+  if (S) return S;
+  return nullptr;
 }
 
 static const MCSymbolWasm *resolveSymbol(const MCSymbolWasm &Symbol) {
@@ -1046,8 +1098,16 @@ void WasmObjectWriter::writeCustomSection(WasmCustomSection &CustomSection,
   auto *Sec = CustomSection.Section;
   startCustomSection(Section, CustomSection.Name);
 
-  Sec->setSectionOffset(W.OS.tell() - Section.ContentsOffset);
-  Asm.writeSectionData(W.OS, Sec, Layout);
+    if (CustomSection.Name == "__clangast") {
+      // pad to nearest 4 bytes
+      uint64_t RoundedUp = (Section.ContentsOffset + 3ULL) & ~3ULL;
+      for (uint64_t Count = 0; Count < RoundedUp - Section.ContentsOffset; Count++) {
+        W.OS << char(0);
+      }
+    }
+
+    Sec->setSectionOffset(W.OS.tell() - Section.ContentsOffset);
+    Asm.writeSectionData(W.OS, Sec, Layout);
 
   CustomSection.OutputContentsOffset = Section.ContentsOffset;
   CustomSection.OutputIndex = Section.Index;
@@ -1128,7 +1188,28 @@ static bool isInSymtab(const MCSymbolWasm &Sym) {
   if (Sym.isSection())
     return false;
 
+  // Clang's precompiled headers are in a separate custom section
+  if (Sym.getName() == "__clang_ast")
+    return false;
+
   return true;
+}
+
+// SwiftWasm: takes a MCSymbolWasm that's an alias expression of the form
+// ((targetSymbol + constantA) - constantB) + constantC...)
+// return the final offset from targetSymbol.
+// if no offset, returns 0.
+static int64_t getAliasedSymbolOffset(const MCSymbolWasm &Symbol,
+                                      const MCAsmLayout &Layout) {
+  if (!Symbol.isVariable())
+    return 0;
+  const MCExpr *Expr = Symbol.getVariableValue();
+  MCValue Res;
+  if (!Expr->evaluateAsRelocatable(Res, &Layout, nullptr)) {
+    Expr->dump();
+    report_fatal_error("Can't evaluate alias symbol expression");
+  }
+  return Res.getConstant();
 }
 
 uint64_t WasmObjectWriter::writeObject(MCAssembler &Asm,
@@ -1361,6 +1442,10 @@ uint64_t WasmObjectWriter::writeObject(MCAssembler &Asm,
       LLVM_DEBUG(dbgs() << "  -> function index: " << Index << "\n");
 
     } else if (WS.isData()) {
+      if (WS.getName() == "__clang_ast")
+        continue;
+      if (WS.isTemporary() && !WS.getSize())
+        continue;
       if (!isInSymtab(WS))
         continue;
 
@@ -1447,8 +1532,16 @@ uint64_t WasmObjectWriter::writeObject(MCAssembler &Asm,
       LLVM_DEBUG(dbgs() << "  -> index:" << WasmIndex << "\n");
     } else if (ResolvedSym->isData()) {
       assert(DataLocations.count(ResolvedSym) > 0);
-      const wasm::WasmDataReference &Ref =
+      // SwiftWasm: hack: grab the offset
+      // Swift has aliases of the form
+      // alias = ((symbol + constant) - constant)
+      // so we need to evaluate the constants here using MCExpr
+      // there's probably a proper way to do this.
+      int64_t Offset = getAliasedSymbolOffset(WS, Layout);
+      wasm::WasmDataReference Ref =
           DataLocations.find(ResolvedSym)->second;
+      Ref.Offset += Offset;
+      Ref.Size -= Offset;
       DataLocations[&WS] = Ref;
       LLVM_DEBUG(dbgs() << "  -> index:" << Ref.Segment << "\n");
     } else {

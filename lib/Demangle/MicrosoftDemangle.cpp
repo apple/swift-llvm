@@ -2160,7 +2160,7 @@ NodeArrayNode *Demangler::demangleFunctionParameterList(StringView &MangledName,
 
 NodeArrayNode *
 Demangler::demangleTemplateParameterList(StringView &MangledName) {
-  NodeList *Head = Arena.alloc<NodeArrayNode>();
+  NodeList *Head = nullptr;
   NodeList **Current = &Head;
   size_t Count = 0;
 

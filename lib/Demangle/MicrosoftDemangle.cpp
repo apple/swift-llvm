@@ -1791,9 +1791,8 @@ TypeNode *Demangler::demangleType(StringView &MangledName,
     Ty = demanglePrimitiveType(MangledName);
   }
 
-  if (!Ty || Error)
-    return Ty;
-  Ty->Quals = Qualifiers(Ty->Quals | Quals);
+  if (Ty && !Error)
+    Ty->Quals = Qualifiers(Ty->Quals | Quals);
   return Ty;
 }
 
@@ -2161,7 +2160,7 @@ NodeArrayNode *Demangler::demangleFunctionParameterList(StringView &MangledName,
 
 NodeArrayNode *
 Demangler::demangleTemplateParameterList(StringView &MangledName) {
-  NodeList *Head;
+  NodeList *Head = Arena.alloc<NodeArrayNode>();
   NodeList **Current = &Head;
   size_t Count = 0;
 
